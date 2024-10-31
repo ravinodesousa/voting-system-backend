@@ -13,6 +13,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "electionId",
         as: "election",
       });
+
+      // Vote.belongsTo(models.User, {
+      //   foreignKey: "candidateId",
+      //   as: "user", // Alias for the associated User model
+      // });
     }
   }
   Vote.init(

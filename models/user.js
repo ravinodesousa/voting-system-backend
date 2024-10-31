@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
       //   foreignKey: "candidateId",
       //   as: "candidate",
       // });
+      // User.hasMany(models.Vote, {
+      //   foreignKey: "candidateId",
+      //   as: "votes",
+      // });
     }
   }
   User.init(
