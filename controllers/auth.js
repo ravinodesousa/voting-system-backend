@@ -7,11 +7,28 @@ const { use } = require("../routes/auth");
 var jwt = require("jsonwebtoken");
 const { generateToken } = require("../helper/AuthHelper");
 
+const EMAIL_REGEX =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const saltRounds = 10;
 
 const login = async (req, res) => {
   // todo: zod validation for all body params
   //   const users = await User.findAll();
+
+  if (req.body?.email == "" || req.body?.password == "") {
+    return res.status(500).json({
+      error: true,
+      message: "Email and password are mandatory. Please try again.",
+    });
+  }
+
+  if (!String(req.body?.email).toLowerCase().match(EMAIL_REGEX)) {
+    return res.status(500).json({
+      error: true,
+      message: "Invalid email. Please try again.",
+    });
+  }
+
   let user = null,
     userType = "";
 
@@ -79,6 +96,90 @@ const login = async (req, res) => {
 
 const signup = async (req, res) => {
   // todo: zod validation for all body params
+
+  if (req.body?.email == "") {
+    return res.status(500).json({
+      error: true,
+      message: "Email is mandatory.",
+    });
+  }
+
+  if (req.body?.firstName == "") {
+    return res.status(500).json({
+      error: true,
+      message: "First name is mandatory.",
+    });
+  }
+
+  if (req.body?.lastName == "") {
+    return res.status(500).json({
+      error: true,
+      message: "Last name is mandatory.",
+    });
+  }
+
+  if (req.body?.password == "") {
+    return res.status(500).json({
+      error: true,
+      message: "Password is mandatory.",
+    });
+  }
+
+  if (req.body?.cpassword == "") {
+    return res.status(500).json({
+      error: true,
+      message: "Confirm Password is mandatory.",
+    });
+  }
+
+  if (req.body?.mobNo == "") {
+    return res.status(500).json({
+      error: true,
+      message: "Mobile number is mandatory.",
+    });
+  }
+
+  if (req.body?.uploadedPhoto == "") {
+    return res.status(500).json({
+      error: true,
+      message: "Photo is mandatory.",
+    });
+  }
+
+  if (req.body?.gender == "") {
+    return res.status(500).json({
+      error: true,
+      message: "Gender is mandatory.",
+    });
+  }
+
+  if (req.body?.age == "") {
+    return res.status(500).json({
+      error: true,
+      message: "Age is mandatory.",
+    });
+  }
+
+  if (req.body?.userType == "") {
+    return res.status(500).json({
+      error: true,
+      message: "User Type not selected.",
+    });
+  }
+
+  if (req.body?.userType == "CANDIDATE" && req.body?.partyId == "") {
+    return res.status(500).json({
+      error: true,
+      message: "Party not selected.",
+    });
+  }
+
+  if (!String(req.body?.email).toLowerCase().match(EMAIL_REGEX)) {
+    return res.status(500).json({
+      error: true,
+      message: "Invalid email. Please try again.",
+    });
+  }
 
   console.log("request signup", req?.body);
   let user = null;
