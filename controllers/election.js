@@ -7,6 +7,22 @@ const User = model.Election;
 const ElectionResult = model.ElectionResult;
 const Vote = model.Vote;
 
+const env = process.env.NODE_ENV || "development";
+const config = require(__dirname + "/../config/config.json")[env];
+const db = {};
+
+let sequelize;
+if (config.use_env_variable) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+  sequelize = new Sequelize(
+    config.database,
+    config.username,
+    config.password,
+    config
+  );
+}
+
 const createElection = async (req, res) => {
   try {
     const newElection = await Election.create({
@@ -205,44 +221,86 @@ const getElectionResult = async (req, res) => {
         // ],
       },
     ],
+    raw: true,
+    nest: true,
   });
 
-  console.log("elections", elections);
+  console.log("elections before", elections);
 
   for (let election of elections) {
-    if (election?.results) {
+    if (election?.results?.candidateId != null) {
       console.log("election result", election?.results);
       let candidate = await User.findOne({
         where: {
           id: election?.results?.candidateId,
         },
+        raw: true,
+        nest: true,
       });
 
       election.results = { ...election.results, candidate };
     }
 
     // fetch all candidates and their total votes
-    let allVotes = await Vote.findAll({
-      attributes: [
-        "candidateId",
-        [Sequelize.fn("COUNT", Sequelize.col("candidateId")), "totalVotes"],
-      ],
-      where: { electionId: election.id },
-      group: ["candidateId"],
-      raw: true,
-    });
+    // let allVotes = await Vote.findAll({
+    //   attributes: [
+    //     "candidateId",
+    //     [Sequelize.fn("COUNT", Sequelize.col("candidateId")), "totalVotes"],
+    //     [
+    //       // candidate details
+    //       Sequelize.literal(`(
+    //         SELECT user.*
+    //         FROM Users AS user
+    //         WHERE user.id = Vote.candidateId
+    //       )`),
+    //     ],
+    //   ],
+    //   where: { electionId: election.id },
+    //   group: ["candidateId"],
+    //   raw: true,
+    //   nest: true,
+    // });
 
-    for (let vote of allVotes) {
-      let candidate = await User.findOne({
-        where: {
-          id: vote?.candidateId,
-        },
-      });
+    const allVotes = await sequelize.query(
+      `
+    SELECT 
+      Vote.candidateId,
+      COUNT(Vote.candidateId) AS totalVotes,
+      User.id AS userId,
+      User.firstName,
+      User.lastName,
+      User.email,
+      User.mob_no,
+      User.photo,
+      User.gender,
+      User.age,
+      User.user_type,
+      User.partyId,
+      User.status
+    FROM Votes AS Vote
+    JOIN Users AS User ON User.id = Vote.candidateId
+    WHERE Vote.electionId = :electionId
+    GROUP BY Vote.candidateId, User.id
+  `,
+      {
+        replacements: { electionId: election.id }, // bind parameter to avoid SQL injection
+        type: Sequelize.QueryTypes.SELECT,
+      }
+    );
 
-      vote = { ...vote, candidate };
-    }
+    console.log("allVotes result", allVotes);
 
-    election = { ...election, votes: allVotes };
+    // for (let vote of allVotes) {
+    //   let candidate = await User.findOne({
+    //     where: {
+    //       id: vote?.candidateId,
+    //     },
+    //   });
+
+    //   vote = { ...vote, candidate };
+    // }
+
+    election.votes = allVotes;
   }
 
   console.log("elections 333", elections);
