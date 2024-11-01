@@ -21,6 +21,12 @@ change following values for "development", "test" and "production"
 
 for testing kepp all values the same
 
-Step 4] Run project
+Step 5] Run all migrations and seeders using the follwoing 2 commands
+
+npx sequelize-cli db:migrate
+
+npx sequelize-cli db:seed:all
+
+Step 6] Run project
 
 npm start
