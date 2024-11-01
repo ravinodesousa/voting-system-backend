@@ -19,7 +19,7 @@ router.post("/edit", validateToken, editElection);
 router.get("/list", validateToken, electionList);
 router.get("/voted/list", validateToken, electionListWithVotedFlag);
 
-router.get("/party/list", validateToken, partyList);
+router.get("/party/list", partyList);
 router.post("/party/add", validateToken, addParty);
 router.post("/party/status/edit", validateToken, editPartyStatus);
 router.post("/party/edit", validateToken, editParty);
