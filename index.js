@@ -3,6 +3,7 @@ const expressListRoutes = require("express-list-routes");
 const { Sequelize } = require("sequelize");
 const cors = require("cors");
 var cron = require("node-cron");
+require("dotenv").config();
 
 const PORT = process.env.PORT || 8000;
 

@@ -6,13 +6,13 @@ const bcrypt = require("bcrypt");
 const { use } = require("../routes/auth");
 var jwt = require("jsonwebtoken");
 const { generateToken } = require("../helper/AuthHelper");
+const { sendEmail } = require("../helper/MailHelper");
 
 const EMAIL_REGEX =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const saltRounds = 10;
 
 const login = async (req, res) => {
-  // todo: zod validation for all body params
   //   const users = await User.findAll();
 
   if (req.body?.email == "" || req.body?.password == "") {
@@ -95,8 +95,6 @@ const login = async (req, res) => {
 };
 
 const signup = async (req, res) => {
-  // todo: zod validation for all body params
-
   if (req.body?.email == "") {
     return res.status(500).json({
       error: true,
@@ -247,9 +245,15 @@ const editUserStatus = async (req, res) => {
     console.log("user", user);
 
     if (user) {
-      // todo: send email
       user.status = req?.body?.status;
       await user.save();
+
+      await sendEmail(
+        user?.email,
+        "User Status changed",
+        `User "${user?.firstName} ${user?.lastName}" has been ${req?.body?.status}`
+      );
+
       return res.status(200).json({ success: true });
     }
   } catch (error) {
