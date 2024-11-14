@@ -3,7 +3,7 @@ const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 const Party = model.Party;
 const Election = model.Election;
-const User = model.Election;
+const User = model.User;
 const ElectionResult = model.ElectionResult;
 const Vote = model.Vote;
 
@@ -71,8 +71,9 @@ const electionList = async (req, res) => {
 
 const electionListWithVotedFlag = async (req, res) => {
   try {
-    // let voterId = req.body.userId;
-    let voterId = 1;
+    // console.log("req.body", req.body);
+    let voterId = req.body?.userId;
+    // let voterId = 1;
 
     const elections = await Election.findAll({
       attributes: {

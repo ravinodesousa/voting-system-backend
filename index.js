@@ -52,8 +52,8 @@ app.listen(PORT, () => {
   console.log(`server running on port ${PORT}`);
 });
 
-cron.schedule("0 * * * *", () => {
-  console.log("running a task every hour");
+cron.schedule("*/5 * * * *", () => {
+  console.log("running a task every 5 min");
   closeElection();
 });
 
